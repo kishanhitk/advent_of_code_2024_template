@@ -10,7 +10,12 @@ A TypeScript template for [Advent of Code](https://adventofcode.com) using Bun. 
 
 ## Using This Template
 
-Click "Use this template" on GitHub or clone the repository.
+Click "Use this template" on GitHub or clone the repository:
+   ```bash
+   git clone https://github.com/kishanhitk/advent_of_code_2024_template.git aoc2024
+   cd aoc2024
+   ```
+
 ## Quick Start
 
 ```bash
