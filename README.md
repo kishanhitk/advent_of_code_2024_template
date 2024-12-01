@@ -2,6 +2,13 @@
 
 Solutions for [Advent of Code 2024](https://adventofcode.com/2024) implemented in TypeScript using Bun.
 
+## Setup
+
+```bash
+# Install dependencies
+bun install
+```
+
 ## Project Structure
 
 ```
@@ -11,36 +18,53 @@ src/
   │   ├── solution.ts  # Solution implementation
   │   └── test.ts      # Tests
   └── utils/           # Shared utilities
-scripts/
-  └── new-day.ts       # Script to scaffold new day
 ```
 
-## Commands
+## CLI Commands
 
-- `bun run src/dayXX/solution.ts` - Run a specific day's solution
-- `bun test` - Run all tests
-- `bun run new-day XX` - Create scaffold for day XX
+The project includes a CLI tool to help manage solutions. Use `bun aoc` followed by these commands:
 
-## Development
+### Create New Day
+
+```bash
+bun aoc new <day>    # Creates scaffold for a specific day (1-25)
+```
+
+### Run Solutions
+
+```bash
+bun aoc run          # Run all implemented solutions
+bun aoc run <day>    # Run solution for a specific day
+```
+
+### Run Tests
+
+```bash
+bun aoc test         # Run all tests
+bun aoc test <day>   # Run tests for a specific day
+bun aoc test -w      # Run all tests in watch mode
+bun aoc test 1 -w    # Run day 1 tests in watch mode
+```
+
+## Development Workflow
 
 1. Create a new day's scaffold:
    ```bash
-   bun run new-day 01
+   bun aoc new 1
    ```
 
-2. Add your puzzle input to `src/dayXX/input.txt`
+2. Add your puzzle input to `src/day01/input.txt`
 
-3. Implement your solution in `src/dayXX/solution.ts`
+3. Add the example input and expected results in `src/day01/test.ts`
 
-4. Run your solution:
+4. Implement your solution in `src/day01/solution.ts`
+
+5. Run tests in watch mode while developing:
    ```bash
-   bun run src/day01/solution.ts
+   bun aoc test 1 -w
    ```
 
-## Testing
-
-Each day's solution includes a test file. Run all tests with:
-
-```bash
-bun test
-```
+6. Run your solution:
+   ```bash
+   bun aoc run 1
+   ```

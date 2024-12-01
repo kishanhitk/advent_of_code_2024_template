@@ -5,11 +5,12 @@
   "scripts": {
     "start": "bun run",
     "test": "bun test",
-    "new-day": "bun scripts/new-day.ts"
+    "aoc": "bun cli.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "latest"
+    "@types/node": "latest",
+    "commander": "^11.1.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
