@@ -5,6 +5,8 @@ A TypeScript template for [Advent of Code](https://adventofcode.com) using Bun. 
 - TypeScript with full type safety
 - Fast test execution with Bun
 - Auto-reloading development environment
+- Performance metrics (execution time and memory usage)
+- Flexible testing with optional expected outputs
 - Utility functions for common operations
 - Organized project structure
 
@@ -157,8 +159,22 @@ function part2(input: string): number {
 
 if (import.meta.main) {
     const input = readInput(day);
-    console.log(`Day ${day} Part 1: ${part1(input)}`);
-    console.log(`Day ${day} Part 2: ${part2(input)}`);
+    
+    console.log(`Day ${day}:`);
+    
+    const start1 = performance.now();
+    const result1 = part1(input);
+    const end1 = performance.now();
+    console.log(`Part 1: ${result1}`);
+    console.log(`Time: ${(end1 - start1).toFixed(2)}ms`);
+    console.log(`Memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB\n`);
+    
+    const start2 = performance.now();
+    const result2 = part2(input);
+    const end2 = performance.now();
+    console.log(`Part 2: ${result2}`);
+    console.log(`Time: ${(end2 - start2).toFixed(2)}ms`);
+    console.log(`Memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB`);
 }
 
 export { part1, part2 };
@@ -173,7 +189,10 @@ describe('Day 01', () => {
     const example = `example input here`;
 
     test('part 1 - example', () => {
-        expect(part1(example)).toBe(expected);
+        const result = part1(example);
+        console.log('Example result:', result);
+        // Uncomment and update if you have expected output:
+        // expect(result).toBe(expected);
     });
 
     // More tests...
@@ -213,6 +232,7 @@ containsOnly("abc123", "abc123");  // true
    - Start with example inputs
    - Write tests before implementation
    - Use watch mode for quick feedback
+   - Add expected outputs in tests when available
 
 2. Input Handling
    - Always trim input
@@ -220,9 +240,10 @@ containsOnly("abc123", "abc123");  // true
    - Handle edge cases
 
 3. Performance
-   - Track solution stats in `problem.md`
+   - Automatic tracking of execution time and memory usage
+   - Results show both time and memory metrics
    - Optimize after getting correct answer
-   - Consider memory usage
+   - Consider memory usage for large inputs
 
 4. Code Organization
    - Keep utility functions in `utils/`

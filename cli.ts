@@ -71,8 +71,22 @@ function part2(input: string): number {
 
 if (import.meta.main) {
     const input = readInput(day);
-    console.log(\`Day \${day} Part 1: \${part1(input)}\`);
-    console.log(\`Day \${day} Part 2: \${part2(input)}\`);
+    
+    console.log(\`Day \${day}:\`);
+    
+    const start1 = performance.now();
+    const result1 = part1(input);
+    const end1 = performance.now();
+    console.log(\`Part 1: \${result1}\`);
+    console.log(\`Time: \${(end1 - start1).toFixed(2)}ms\`);
+    console.log(\`Memory: \${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB\n\`);
+    
+    const start2 = performance.now();
+    const result2 = part2(input);
+    const end2 = performance.now();
+    console.log(\`Part 2: \${result2}\`);
+    console.log(\`Time: \${(end2 - start2).toFixed(2)}ms\`);
+    console.log(\`Memory: \${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB\`);
 }
 
 export { part1, part2 };`;
@@ -87,21 +101,29 @@ describe('Day ${paddedDay}', () => {
     const example = \`EXAMPLE_INPUT_HERE\`;  // Replace with example input
 
     test('part 1 - example', () => {
-        expect(part1(example)).toBe(0);  // Replace with expected result
+        const result = part1(example);
+        console.log('Example result:', result);
+        // Uncomment and update if you have expected output:
+        // expect(result).toBe(0);
     });
 
     test('part 1 - input', () => {
         const input = readInput(day);
-        expect(part1(input)).toBe(0);  // Replace with expected result
+        const result = part1(input);
+        console.log('Your input result:', result);
     });
 
     test('part 2 - example', () => {
-        expect(part2(example)).toBe(0);  // Replace with expected result
+        const result = part2(example);
+        console.log('Example result:', result);
+        // Uncomment and update if you have expected output:
+        // expect(result).toBe(0);
     });
 
     test('part 2 - input', () => {
         const input = readInput(day);
-        expect(part2(input)).toBe(0);  // Replace with expected result
+        const result = part2(input);
+        console.log('Your input result:', result);
     });
 });`;
 
