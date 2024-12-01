@@ -4,7 +4,9 @@ import { mkdir, writeFile, readFile } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawnSync } from "child_process";
+import { watch } from "fs/promises";
 import { fetchProblem, generateProblemMd } from "./src/utils/problem-fetcher";
+import { yellow, green } from "picocolors";
 
 const program = new Command();
 
@@ -88,9 +90,9 @@ describe('Day ${paddedDay}', () => {
     });
 });`;
 
-    // Create files
+    // Create files with correct test naming
     await writeFile(join(dayPath, "solution.ts"), solutionContent);
-    await writeFile(join(dayPath, "test.ts"), testContent);
+    await writeFile(join(dayPath, "solution.test.ts"), testContent);
     await writeFile(join(dayPath, "input.txt"), "");
 
     // Fetch and create problem.md
@@ -156,12 +158,19 @@ EXAMPLE_INPUT_HERE
     console.log(`🧪 Run tests: bun aoc test ${dayNum}`);
   });
 
+// Helper function to check if a file should trigger a reload
+function shouldReload(filename: string | null): boolean {
+  if (!filename) return false;
+  return filename.endsWith(".ts") || filename.endsWith(".txt");
+}
+
 // Run solution command
 program
   .command("run")
   .argument("[day]", "day number (1-25)")
+  .option("-w, --watch", "watch mode")
   .description("Run solution for a specific day or all days")
-  .action((day?: string) => {
+  .action(async (day?: string, options?: { watch?: boolean }) => {
     if (day) {
       const dayNum = parseInt(day);
       if (isNaN(dayNum) || dayNum < 1 || dayNum > 25) {
@@ -176,18 +185,70 @@ program
         process.exit(1);
       }
 
-      console.log(`🎄 Running solution for day ${paddedDay}...\n`);
-      spawnSync("bun", ["run", solutionPath], { stdio: "inherit" });
+      const runSolution = () => {
+        console.clear();
+        console.log(`🎄 Running solution for day ${paddedDay}...\n`);
+        const result = spawnSync("bun", ["run", solutionPath], {
+          stdio: "inherit",
+          env: { ...process.env, FORCE_COLOR: "1" },
+        });
+        if (result.status !== 0) {
+          console.error(`\n❌ Solution failed with exit code ${result.status}`);
+        }
+      };
+
+      if (options?.watch) {
+        console.log(
+          `👀 ${yellow("Watching")} for changes in day ${paddedDay}...`
+        );
+        console.log(
+          `💡 ${green("Tip:")} Save any file to re-run the solution\n`
+        );
+
+        // Initial run
+        runSolution();
+
+        // Watch for changes
+        const dayPath = join("src", `day${paddedDay}`);
+        try {
+          const watcher = watch(dayPath, { recursive: true });
+          for await (const event of watcher) {
+            if (shouldReload(event.filename)) {
+              runSolution();
+            }
+          }
+        } catch (error) {
+          console.error("Watch mode error:", error);
+          process.exit(1);
+        }
+      } else {
+        runSolution();
+      }
     } else {
       // Run all implemented solutions
       console.log("🎄 Running all implemented solutions...\n");
+      let foundAny = false;
+
       for (let i = 1; i <= 25; i++) {
         const paddedDay = i.toString().padStart(2, "0");
         const solutionPath = join("src", `day${paddedDay}`, "solution.ts");
+
         if (existsSync(solutionPath)) {
+          foundAny = true;
           console.log(`\n📅 Day ${paddedDay}:`);
-          spawnSync("bun", ["run", solutionPath], { stdio: "inherit" });
+          const result = spawnSync("bun", ["run", solutionPath], {
+            stdio: "inherit",
+            env: { ...process.env, FORCE_COLOR: "1" },
+          });
+          if (result.status !== 0) {
+            process.exit(result.status ?? 1);
+          }
         }
+      }
+
+      if (!foundAny) {
+        console.log("No solutions found to run!");
+        process.exit(1);
       }
     }
   });
@@ -198,9 +259,24 @@ program
   .argument("[day]", "day number (1-25)")
   .option("-w, --watch", "watch mode")
   .description("Run tests for a specific day or all days")
-  .action((day?: string, options?: { watch?: boolean }) => {
-    const args = ["test"];
-    if (options?.watch) args.push("--watch");
+  .action(async (day?: string, options?: { watch?: boolean }) => {
+    const runTests = (testPath?: string) => {
+      const args = ["test"];
+      if (options?.watch) args.push("--watch");
+      if (testPath) args.push(testPath);
+
+      console.clear();
+      console.log("🧪 Running tests...\n");
+
+      const result = spawnSync("bun", args, {
+        stdio: "inherit",
+        env: { ...process.env, FORCE_COLOR: "1" },
+      });
+
+      if (result.status !== 0) {
+        console.error(`\n❌ Tests failed with exit code ${result.status}`);
+      }
+    };
 
     if (day) {
       const dayNum = parseInt(day);
@@ -209,22 +285,61 @@ program
         process.exit(1);
       }
       const paddedDay = day.padStart(2, "0");
-      const testPath = join("src", `day${paddedDay}`, "test.ts");
+      const testPath = join("src", `day${paddedDay}`, "solution.test.ts");
 
       if (!existsSync(testPath)) {
         console.error(`Tests for day ${paddedDay} not found!`);
         process.exit(1);
       }
 
-      console.log(`🧪 Running tests for day ${paddedDay}...\n`);
-      args.push(testPath);
-    } else {
-      console.log("🧪 Running all tests...\n");
-    }
+      if (options?.watch) {
+        console.log(
+          `👀 ${yellow("Watching")} for changes in day ${paddedDay}...`
+        );
+        console.log(`💡 ${green("Tip:")} Save any file to re-run the tests\n`);
 
-    const result = spawnSync("bun", args, { stdio: "inherit" });
-    if (result.status !== 0) {
-      process.exit(result.status ?? 1);
+        // Initial run
+        runTests(testPath);
+
+        // Watch for changes
+        const dayPath = join("src", `day${paddedDay}`);
+        try {
+          const watcher = watch(dayPath, { recursive: true });
+          for await (const event of watcher) {
+            if (shouldReload(event.filename)) {
+              runTests(testPath);
+            }
+          }
+        } catch (error) {
+          console.error("Watch mode error:", error);
+          process.exit(1);
+        }
+      } else {
+        runTests(testPath);
+      }
+    } else {
+      if (options?.watch) {
+        console.log(`👀 ${yellow("Watching")} for changes in all tests...`);
+        console.log(`💡 ${green("Tip:")} Save any file to re-run all tests\n`);
+
+        // Initial run
+        runTests();
+
+        // Watch for changes in src directory
+        try {
+          const watcher = watch("src", { recursive: true });
+          for await (const event of watcher) {
+            if (shouldReload(event.filename)) {
+              runTests();
+            }
+          }
+        } catch (error) {
+          console.error("Watch mode error:", error);
+          process.exit(1);
+        }
+      } else {
+        runTests();
+      }
     }
   });
 

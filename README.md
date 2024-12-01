@@ -14,13 +14,13 @@ bun install
 ```
 src/
   ├── day01/
-  │   ├── input.txt    # Puzzle input
-  │   ├── solution.ts  # Solution implementation
-  │   ├── test.ts      # Tests
-  │   └── problem.md   # Problem statement and notes
-  └── utils/           # Shared utilities
-      ├── input.ts     # Input reading utilities
-      └── problem-fetcher.ts  # Problem fetching utilities
+  │   ├── input.txt         # Puzzle input
+  │   ├── solution.ts       # Solution implementation
+  │   ├── solution.test.ts  # Tests for the solution
+  │   └── problem.md        # Problem statement and notes
+  └── utils/                # Shared utilities
+      ├── input.ts          # Input reading utilities
+      └── problem-fetcher.ts # Problem fetching utilities
 ```
 
 ## CLI Commands
@@ -39,6 +39,8 @@ bun aoc new <day> --no-fetch  # Creates scaffold without fetching problem
 ```bash
 bun aoc run          # Run all implemented solutions
 bun aoc run <day>    # Run solution for a specific day
+bun aoc run -w       # Run all solutions in watch mode
+bun aoc run 1 -w     # Run day 1 solution in watch mode
 ```
 
 ### Run Tests
@@ -77,16 +79,13 @@ bun aoc problem <day>  # View problem statement and notes for a specific day
 
 4. Update the test file with example inputs and expected results
 
-5. Implement your solution in `src/day01/solution.ts`
-
-6. Run tests in watch mode while developing:
+5. Start the development cycle:
    ```bash
+   # In one terminal: Run solution in watch mode
+   bun aoc run 1 -w
+
+   # In another terminal: Run tests in watch mode
    bun aoc test 1 -w
-   ```
-
-7. Run your solution:
-   ```bash
-   bun aoc run 1
    ```
 
 ## Problem Statement Format
