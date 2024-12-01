@@ -1,12 +1,42 @@
-# Advent of Code 2024
+# Advent of Code Template
 
-Solutions for [Advent of Code 2024](https://adventofcode.com/2024) implemented in TypeScript using Bun.
+A TypeScript template for [Advent of Code](https://adventofcode.com) using Bun. Features include:
+- Automated problem fetching and formatting
+- TypeScript with full type safety
+- Fast test execution with Bun
+- Auto-reloading development environment
+- Utility functions for common operations
+- Organized project structure
 
-## Setup
+## Using This Template
+
+1. Click "Use this template" on GitHub or clone the repository
+2. Rename and customize as needed:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/advent_of_code_template.git aoc2024
+   cd aoc2024
+   rm -rf .git
+   git init
+   ```
+3. Install dependencies:
+   ```bash
+   bun install
+   ```
+
+## Quick Start
 
 ```bash
 # Install dependencies
 bun install
+
+# Create a new day
+bun aoc new 1
+
+# Run solution with auto-reload
+bun aoc run 1 -w
+
+# Run tests with auto-reload
+bun aoc test 1 -w
 ```
 
 ## Project Structure
@@ -25,83 +55,195 @@ src/
 
 ## CLI Commands
 
-The project includes a CLI tool to help manage solutions. Use `bun aoc` followed by these commands:
+The project includes a powerful CLI tool. Use `bun aoc` followed by these commands:
 
 ### Create New Day
 
 ```bash
-bun aoc new <day>     # Creates scaffold for a specific day (1-25) and fetches problem
-bun aoc new <day> --no-fetch  # Creates scaffold without fetching problem
+# Create new day with auto-fetched problem
+bun aoc new <day>
+
+# Create without fetching problem
+bun aoc new <day> --no-fetch
 ```
+
+This will:
+- Create the day's directory structure
+- Fetch and format the problem statement
+- Create solution and test templates
+- Extract example inputs
+- Provide instructions for getting your input
 
 ### Run Solutions
 
 ```bash
-bun aoc run          # Run all implemented solutions
-bun aoc run <day>    # Run solution for a specific day
-bun aoc run -w       # Run all solutions in watch mode
-bun aoc run 1 -w     # Run day 1 solution in watch mode
+# Run specific day
+bun aoc run <day>
+
+# Run with auto-reload (watch mode)
+bun aoc run <day> -w
+
+# Run all solutions
+bun aoc run
+
+# Run all in watch mode
+bun aoc run -w
 ```
 
 ### Run Tests
 
 ```bash
-bun aoc test         # Run all tests
-bun aoc test <day>   # Run tests for a specific day
-bun aoc test -w      # Run all tests in watch mode
-bun aoc test 1 -w    # Run day 1 tests in watch mode
+# Run specific day's tests
+bun aoc test <day>
+
+# Run with auto-reload
+bun aoc test <day> -w
+
+# Run all tests
+bun aoc test
+
+# Run all tests in watch mode
+bun aoc test -w
 ```
 
-### View Problem Statement
+### View Problem
 
 ```bash
-bun aoc problem <day>  # View problem statement and notes for a specific day
+# View problem statement
+bun aoc problem <day>
 ```
 
 ## Development Workflow
 
-1. Create a new day's scaffold with auto-fetched problem:
+1. Create New Day
    ```bash
    bun aoc new 1
    ```
-   This will:
-   - Create the day's directory structure
-   - Fetch and format the problem statement
-   - Create solution and test templates
-   - Extract example inputs
 
-2. Review the auto-generated `problem.md`:
-   - Verify the problem statement is correctly formatted
-   - Check the extracted example inputs
-   - Plan your approach using the provided checklist
+2. Get Your Input
+   - Follow the provided link to get your input
+   - Copy and paste into `src/dayXX/input.txt`
+   - Each user gets unique input data!
 
-3. Add your puzzle input to `src/day01/input.txt`
+3. Review Problem
+   - Check `problem.md` for:
+     - Problem description
+     - Example inputs/outputs
+     - Your approach checklist
 
-4. Update the test file with example inputs and expected results
-
-5. Start the development cycle:
+4. Development Loop
    ```bash
-   # In one terminal: Run solution in watch mode
+   # Terminal 1: Watch solution
    bun aoc run 1 -w
 
-   # In another terminal: Run tests in watch mode
+   # Terminal 2: Watch tests
    bun aoc test 1 -w
    ```
 
-## Problem Statement Format
+5. Implement Solution
+   - Start with example inputs in tests
+   - Implement part 1
+   - Run against your input
+   - Repeat for part 2
 
-Each day's `problem.md` includes:
-- Auto-fetched problem statement
-- Extracted example inputs
-- Approach checklist for implementation
-- Performance stats tracking
+## Solution Structure
 
-## Note on Problem Fetching
+### solution.ts
+```typescript
+import { readInput, readLines } from '../utils/input';
 
-The problem fetcher will automatically:
-- Fetch the problem statement from adventofcode.com
-- Convert HTML to formatted markdown
-- Extract and format example inputs
-- Create a structured template for notes and stats
+const day = '01';
 
-If fetching fails (e.g., due to authentication or network issues), a template will be created instead.
+function part1(input: string): number {
+    // Implementation
+}
+
+function part2(input: string): number {
+    // Implementation
+}
+
+if (import.meta.main) {
+    const input = readInput(day);
+    console.log(`Day ${day} Part 1: ${part1(input)}`);
+    console.log(`Day ${day} Part 2: ${part2(input)}`);
+}
+
+export { part1, part2 };
+```
+
+### solution.test.ts
+```typescript
+import { describe, expect, test } from "bun:test";
+import { part1, part2 } from './solution';
+
+describe('Day 01', () => {
+    const example = `example input here`;
+
+    test('part 1 - example', () => {
+        expect(part1(example)).toBe(expected);
+    });
+
+    // More tests...
+});
+```
+
+## Utility Functions
+
+### Input Reading
+```typescript
+import { readInput, readLines, readNumbers } from '../utils/input';
+
+// Read entire input as string
+const input = readInput(day);
+
+// Read input as lines
+const lines = readLines(day);
+
+// Read input as numbers
+const numbers = readNumbers(day);
+```
+
+### Input Validation
+```typescript
+import { isNumeric, containsOnly } from '../utils/input';
+
+// Check if string contains only numbers
+isNumeric("123");  // true
+
+// Check if string contains only allowed characters
+containsOnly("abc123", "abc123");  // true
+```
+
+## Best Practices
+
+1. Testing First
+   - Start with example inputs
+   - Write tests before implementation
+   - Use watch mode for quick feedback
+
+2. Input Handling
+   - Always trim input
+   - Validate input format
+   - Handle edge cases
+
+3. Performance
+   - Track solution stats in `problem.md`
+   - Optimize after getting correct answer
+   - Consider memory usage
+
+4. Code Organization
+   - Keep utility functions in `utils/`
+   - Use TypeScript types
+   - Comment complex logic
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
