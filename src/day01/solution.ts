@@ -12,6 +12,10 @@ function part2(input: string): number {
     return 0;
 }
 
-const input = readInput(day);
-console.log(`Day ${day} Part 1: ${part1(input)}`);
-console.log(`Day ${day} Part 2: ${part2(input)}`);
+if (import.meta.main) {
+    const input = readInput(day);
+    console.log(`Day ${day} Part 1: ${part1(input)}`);
+    console.log(`Day ${day} Part 2: ${part2(input)}`);
+}
+
+export { part1, part2 };

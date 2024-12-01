@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 import { Command } from "commander";
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir, writeFile, readFile } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawnSync } from "child_process";
+import { fetchProblem, generateProblemMd } from "./src/utils/problem-fetcher";
 
 const program = new Command();
 
@@ -16,8 +17,9 @@ program
 program
   .command("new")
   .argument("<day>", "day number (1-25)")
+  .option("--no-fetch", "skip fetching problem statement")
   .description("Create a new day scaffold")
-  .action(async (day: string) => {
+  .action(async (day: string, options: { fetch: boolean }) => {
     const dayNum = parseInt(day);
     if (isNaN(dayNum) || dayNum < 1 || dayNum > 25) {
       console.error("Day must be a number between 1 and 25");
@@ -31,6 +33,8 @@ program
       console.error(`Day ${paddedDay} already exists!`);
       process.exit(1);
     }
+
+    console.log(`🎄 Creating scaffold for day ${paddedDay}...`);
 
     await mkdir(dayPath, { recursive: true });
 
@@ -84,12 +88,70 @@ describe('Day ${paddedDay}', () => {
     });
 });`;
 
+    // Create files
     await writeFile(join(dayPath, "solution.ts"), solutionContent);
     await writeFile(join(dayPath, "test.ts"), testContent);
     await writeFile(join(dayPath, "input.txt"), "");
 
-    console.log(`✨ Created scaffold for day ${paddedDay}`);
+    // Fetch and create problem.md
+    if (options.fetch) {
+      try {
+        console.log("📥 Fetching problem statement...");
+        const problemData = await fetchProblem(dayNum);
+        const problemMd = generateProblemMd(problemData);
+        await writeFile(join(dayPath, "problem.md"), problemMd);
+        console.log("✨ Problem statement fetched and saved!");
+      } catch (error) {
+        console.error("Failed to fetch problem statement:", error);
+        console.log("Creating template problem.md instead...");
+        const templateProblemMd = `# Day ${dayNum}: Title Goes Here
+
+## Part One
+
+[Problem statement goes here]
+
+## Part Two
+
+[Problem statement goes here]
+
+## Notes
+
+- Example input:
+\`\`\`
+EXAMPLE_INPUT_HERE
+\`\`\`
+
+- Expected output (Part 1): X
+- Expected output (Part 2): Y
+
+## Approach
+
+### Part 1
+- [ ] Step 1
+- [ ] Step 2
+
+### Part 2
+- [ ] Step 1
+- [ ] Step 2
+
+## Solution Stats
+
+### Part 1
+- Time: XX ms
+- Memory: XX MB
+
+### Part 2
+- Time: XX ms
+- Memory: XX MB`;
+        await writeFile(join(dayPath, "problem.md"), templateProblemMd);
+      }
+    }
+
+    console.log(`\n✨ Created scaffold for day ${paddedDay}`);
     console.log(`📝 Add your puzzle input to src/day${paddedDay}/input.txt`);
+    if (!options.fetch) {
+      console.log(`📖 Add problem statement to src/day${paddedDay}/problem.md`);
+    }
     console.log(`🚀 Run solution: bun aoc run ${dayNum}`);
     console.log(`🧪 Run tests: bun aoc test ${dayNum}`);
   });
@@ -164,6 +226,30 @@ program
     if (result.status !== 0) {
       process.exit(result.status ?? 1);
     }
+  });
+
+// Problem statement commands
+program
+  .command("problem")
+  .argument("<day>", "day number (1-25)")
+  .description("View problem statement for a specific day")
+  .action(async (day: string) => {
+    const dayNum = parseInt(day);
+    if (isNaN(dayNum) || dayNum < 1 || dayNum > 25) {
+      console.error("Day must be a number between 1 and 25");
+      process.exit(1);
+    }
+
+    const paddedDay = day.padStart(2, "0");
+    const problemPath = join("src", `day${paddedDay}`, "problem.md");
+
+    if (!existsSync(problemPath)) {
+      console.error(`Problem statement for day ${paddedDay} not found!`);
+      process.exit(1);
+    }
+
+    const content = await readFile(problemPath, "utf-8");
+    console.log(content);
   });
 
 program.parse();
