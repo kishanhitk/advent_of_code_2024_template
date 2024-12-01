@@ -6,7 +6,7 @@ import { existsSync } from "fs";
 import { spawnSync } from "child_process";
 import { watch } from "fs/promises";
 import { fetchProblem, generateProblemMd } from "./src/utils/problem-fetcher";
-import { yellow, green } from "picocolors";
+import { yellow, green, red } from "picocolors";
 
 const program = new Command();
 
@@ -14,6 +14,21 @@ program
   .name("aoc")
   .description("CLI tool for Advent of Code 2024")
   .version("1.0.0");
+
+function getInputInstructions(day: string, year = "2024"): string {
+  const paddedDay = day.padStart(2, "0");
+  return `
+${yellow("To get your input file:")}
+1. Go to ${green(`https://adventofcode.com/${year}/day/${parseInt(day)}/input`)}
+2. Copy your input data
+3. Create file: ${green(`src/day${paddedDay}/input.txt`)}
+4. Paste your input data into the file
+
+${yellow(
+  "Note:"
+)} If you're not logged in, you'll need to log in to get your personal input.
+Each user gets different input data, so make sure to use your own!`;
+}
 
 // Create new day command
 program
@@ -90,7 +105,7 @@ describe('Day ${paddedDay}', () => {
     });
 });`;
 
-    // Create files with correct test naming
+    // Create files
     await writeFile(join(dayPath, "solution.ts"), solutionContent);
     await writeFile(join(dayPath, "solution.test.ts"), testContent);
     await writeFile(join(dayPath, "input.txt"), "");
@@ -149,13 +164,20 @@ EXAMPLE_INPUT_HERE
       }
     }
 
-    console.log(`\n✨ Created scaffold for day ${paddedDay}`);
-    console.log(`📝 Add your puzzle input to src/day${paddedDay}/input.txt`);
-    if (!options.fetch) {
-      console.log(`📖 Add problem statement to src/day${paddedDay}/problem.md`);
-    }
-    console.log(`🚀 Run solution: bun aoc run ${dayNum}`);
-    console.log(`🧪 Run tests: bun aoc test ${dayNum}`);
+    console.log("\n✨ Day scaffold created successfully!\n");
+
+    // Show input instructions prominently
+    console.log("📝 Next steps:");
+    console.log(getInputInstructions(day));
+    console.log("\n🚀 Available commands:");
+    console.log(green("→ Run solution:"));
+    console.log(`  bun aoc run ${dayNum}`);
+    console.log(`  bun aoc run ${dayNum} -w  (watch mode)`);
+    console.log(green("\n→ Run tests:"));
+    console.log(`  bun aoc test ${dayNum}`);
+    console.log(`  bun aoc test ${dayNum} -w  (watch mode)`);
+    console.log(green("\n→ View problem:"));
+    console.log(`  bun aoc problem ${dayNum}`);
   });
 
 // Helper function to check if a file should trigger a reload
